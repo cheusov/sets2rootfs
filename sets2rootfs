@@ -1,0 +1,130 @@
+#!/bin/sh
+
+# user-settable variables
+: ${FTP_CMD:=ftp}
+: ${FTP_CALL:=$FTP_CMD -v -o}
+
+: ${CKSUM_CMD:=cksum}
+: ${CKSUM_CALL:=$CKSUM_CMD -a}
+
+: ${TAR_CMD:=tar}
+: ${TAR_OPTS:=-z}
+
+###
+set -o pipefail
+set -e
+
+: ${opsys:=$(uname -s)}
+: ${release:=$(uname -r)}
+: ${machine:=$(uname -m)}
+
+while getopts 'c:d:r:s:u:' opt; do
+    case "$opt" in
+	c)
+	    cache_dir="$OPTARG";;
+	d)
+	    root_dir="$OPTARG";;
+	r)
+	    release="$OPTARG";;
+	s)
+	    opsys="$OPTARG";;
+	u)
+	    url_to_cksum="$OPTARG";;
+	\?)
+	    exit 1;;
+    esac
+done
+shift `expr $OPTIND - 1`
+
+if test -z "$root_dir"; then
+    echo "Option -r is mandatory" 1>&2
+    exit 2
+fi
+
+if test -z "$cache_dir"; then
+    echo "Option -c is mandatory" 1>&2
+    exit 2
+fi
+
+if ! test -d "$root_dir"; then
+    echo "Root FS directory $root_dir does not exist" 1>&2
+    exit 2
+fi
+
+if ! test -d "$cache_dir"; then
+    echo "Cache directory $cache_dir does not exist" 1>&2
+    exit 2
+fi
+
+if test -z "$url_to_cksum"; then
+    case "$opsys" in
+	NetBSD)
+	    url_to_cksum="http://cdn.netbsd.org/pub/NetBSD/NetBSD-$release/$machine/binary/sets/SHA512";;
+	OpenBSD)
+	    url_to_cksum="https://cdn.openbsd.org/pub/OpenBSD/$release/$machine/SHA256";;
+	*)
+	    echo "Unsupported OS $opsys" 1>&2
+	    exit 3;;
+    esac
+fi
+
+url_dir="${url_to_cksum%/*}"
+
+cd "$cache_dir"
+
+cksum_fn="$cache_dir/cksums"
+
+$FTP_CALL "$cksum_fn" "$url_to_cksum"
+
+normalize_cksum_file() {
+    awk -F'[ ()=]+' '
+$2 ~ /^kern/ || $2 !~ /([.](tar|tgz|tbz))/ {
+   next
+}
+{
+    $1 = $1
+    print $0
+}' "$@"
+}
+
+download_set() {
+    # $1 -- set file name
+    if ! test -r "$1"; then
+	$FTP_CALL "$1" "$url_dir/$set"
+    fi
+}
+
+cksum_check(){
+    # $1 -- cksum_type
+    # $2 -- set file name
+    # $3 -- cksum
+    echo "cksum -a $1 $2" 1>&2
+    file_cksum=`$CKSUM_CALL "$1" "$2" | cut -d' ' -f4`
+    if test "$file_cksum" != "$3"; then
+	echo failed 1>&2
+	exit 4
+    fi
+}
+
+unpack_set() {
+    # $1 -- set file name
+    echo "unpacking $set" 1>&2
+    $TAR_CMD $TAR_OPTS -C "$root_dir" -xpf "$set"
+    touch "$cache_dir/$set.unpacked.done"
+}
+
+process_sets(){
+    # stdin line: cksum_type set_file_name cksum
+    while read cksum_type set cksum; do
+	if test -f "$cache_dir/$set.unpacked.done"; then
+	    echo "$set already downloaded and unpacked, so skipped" 1>&2
+	    continue
+	fi
+
+	download_set "$set"
+	cksum_check "$cksum_type" "$set" "$cksum"
+	unpack_set "$set"
+    done
+}
+
+normalize_cksum_file "$cksum_fn" | process_sets

@@ -1,0 +1,57 @@
+.\" Copyright (c) 2024 by Aleksey Cheusov (vle@gmx.net)
+.\" Absolutely no warranty.
+.\"
+.\" ------------------------------------------------------------------
+.Dd May 13, 2024
+.Dt SETS2ROOTFS 1
+.Os
+.Sh NAME
+.Nm sets2rootfs
+.Nd create rootfs for NetBSD and OpenBSD from sets files
+.Sh SYNOPSIS
+.Nm
+.Op Fl c Ar cache_dir
+.Op Fl d Ar root_dir
+.Op Fl r Ar os_release
+.Op Fl s Ar os
+.Op Fl u Ar url
+.Op Ar
+.Sh DESCRIPTION
+.Nm
+downloads cksum file for NetBSD/OpenBSD sets, checks the checksums and unpacks
+downloaded sets, thus creating rootfs for the system.
+.Pp
+The following options are available:
+.Bl -tag -width indent
+.It Fl \&c
+This option specifies the directory for cache, where
+all sets are downloaded before unpacking.
+This is a mandatory option.
+.It Fl \&d
+Directory for rootfs. 
+This is a mandatory option.
+.It Fl \&r
+Operating system release.
+The default is a version of running operating system.
+.It Fl \&s
+Operating system. Currently either NetBSD or OpenBSD.
+The default is a running operating system.
+.It Fl \&u
+URL to SHA256, SHA512 or similar file that describes cksums for sets.
+The default is
+https://cdn.netbsd.org/pub/NetBSD/NetBSD-$release/$machine/binary/sets/SHA512
+for NetBSD and
+https://cdn.openbsd.org/pub/OpenBSD/$release/$machine/SHA256
+for OpenBSD.
+.\".It Ev ENVVARNAME
+.\"description for environment variable
+.Sh EXAMPLES
+.Bd -literal -compact
+ # sets2rootfs -c /tmp/OpenBSD-7.5.cache -s OpenBSD -r 7.5 -d /var/chroots/OpenBSD-7.5
+ # sets2rootfs -c /tmp/NetBSD-10.cache -d /var/chroots/NetBSD-10
+ # sets2rootfs -c /tmp/NetBSD.cache -d /var/chroots/NetBSD
+ # sets2rootfs -c /tmp/NetBSD.cache -d /var/chroots/NetBSD-20240513 \\
+    -u http://nyftp.netbsd.org/pub/NetBSD-daily/HEAD/latest/riscv-riscv64/binary/sets/MD5
+.Ed
+.Sh EXIT STATUS
+.Ex -std
