@@ -1,0 +1,23 @@
+=pod
+
+=head1 Overview:
+
+B<sets2rootfs> downloads cksum file for NetBSD/OpenBSD sets, checks
+the checksums and unpacks downloaded sets, thus creating rootfs for
+the system.
+
+=head1 Examples
+
+    # sets2rootfs -c /tmp/OpenBSD-7.5.cache -s OpenBSD -r 7.5 -d /var/chroots/OpenBSD-7.5
+    # sets2rootfs -c /tmp/NetBSD-10.cache -d /var/chroots/NetBSD-10
+    # sets2rootfs -c /tmp/NetBSD.cache -d /var/chroots/NetBSD
+    # sets2rootfs -c /tmp/NetBSD.cache -d /var/chroots/NetBSD-20240513 \\
+      -u http://nyftp.netbsd.org/pub/NetBSD-daily/HEAD/latest/riscv-riscv64/binary/sets/MD5
+
+=head1 Copyright
+
+Written by Aleksey Cheusov <vle@gmx.net>
+
+https://github.com/cheusov/sets2rootfs
+
+=cut
