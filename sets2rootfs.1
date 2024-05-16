@@ -11,6 +11,7 @@
 .Sh SYNOPSIS
 .Nm
 .Op Fl C
+.Op Fl Q
 .Op Fl c Ar cache_dir
 .Op Fl D | d Ar root_dir
 .Op Fl u Ar url
@@ -20,6 +21,7 @@
 .Op Fl X Ar set_prefix
 .Nm
 .Op Fl C
+.Op Fl Q
 .Op Fl c Ar cache_dir
 .Op Fl D | d Ar root_dir
 .Op Fl s Ar os
@@ -56,6 +58,8 @@ This option can be applied multiple times.
 .It Fl \&m
 Machine architecture.
 The default is architecture of running operating system.
+.It Fl \&q
+Do not send progress messages to stderr.
 .It Fl \&r
 Operating system release.
 The default is a version of running operating system.

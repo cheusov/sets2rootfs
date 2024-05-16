@@ -14,11 +14,18 @@
 set -o pipefail
 set -e
 
+verbose() {
+    # $1 -- verbose message
+    if test -z "$quiet"; then
+	printf '%s\n' "$1" 1>&2
+    fi
+}
+
 : ${opsys:=$(uname -s)}
 : ${release:=$(uname -r)}
 : ${machine:=$(uname -m)}
 
-while getopts 'c:Cd:Di:I:m:r:s:u:x:X:' opt; do
+while getopts 'c:Cd:Di:I:m:qr:s:u:x:X:' opt; do
     case "$opt" in
 	c)
 	    cache_dir="$OPTARG";;
@@ -34,6 +41,8 @@ while getopts 'c:Cd:Di:I:m:r:s:u:x:X:' opt; do
 	    included_sets="$included_sets|^$OPTARG.*"'$';;
 	m)
 	    machine="$OPTARG";;
+	q)
+	    quiet=1;;
 	r)
 	    release="$OPTARG";;
 	s)
@@ -133,10 +142,10 @@ cksum_check(){
     # $1 -- cksum_type
     # $2 -- set file name
     # $3 -- cksum
-    echo "cksum -a $1 $2" 1>&2
+    verbose "$CKSUM_CALL $1 $2"
     file_cksum=`$CKSUM_CALL "$1" "$2" | cut -d' ' -f4`
     if test "$file_cksum" != "$3"; then
-	echo failed 1>&2
+	echo "$CKSUM_CALL $1 $2 failed" 1>&2
 	exit 4
     fi
 }
@@ -144,7 +153,7 @@ cksum_check(){
 unpack_set() {
     # $1 -- set file name
     if test -z "$download_only"; then
-	echo "unpacking $set" 1>&2
+	verbose "unpacking $set"
 	$TAR_CMD $TAR_OPTS -C "$root_dir" -xpf "$set"
 	touch "$cache_dir/$set.unpacked.done"
     fi
@@ -154,7 +163,7 @@ process_sets(){
     # stdin line: cksum_type set_file_name cksum
     while read cksum_type set cksum; do
 	if test -f "$cache_dir/$set.unpacked.done"; then
-	    echo "$set already downloaded and unpacked, so skipped" 1>&2
+	    verbose "$set already downloaded and unpacked, so skipped"
 	    continue
 	fi
 
