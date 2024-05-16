@@ -18,7 +18,7 @@ set -e
 : ${release:=$(uname -r)}
 : ${machine:=$(uname -m)}
 
-while getopts 'c:d:r:s:u:' opt; do
+while getopts 'c:d:r:s:u:x:' opt; do
     case "$opt" in
 	c)
 	    cache_dir="$OPTARG";;
@@ -30,6 +30,8 @@ while getopts 'c:d:r:s:u:' opt; do
 	    opsys="$OPTARG";;
 	u)
 	    url_to_cksum="$OPTARG";;
+	x)
+	    excluded_sets="$excluded_sets $OPTARG";;
 	\?)
 	    exit 1;;
     esac
@@ -77,9 +79,20 @@ cksum_fn="$cache_dir/cksums"
 $FTP_CALL "$cksum_fn" "$url_to_cksum"
 
 normalize_cksum_file() {
-    awk -F'[ ()=]+' '
-$2 ~ /^kern/ || $2 !~ /([.](tar|tgz|tbz))/ {
-   next
+    awk -F'[ ()=]+' -v excluded_sets_str="$excluded_sets" '
+BEGIN {
+    split(excluded_sets_str, a)
+    for (i in a)
+	excluded_sets[a[i]] = 1
+}
+
+{
+    set = $2
+    sub(/[.](tar.*|tgz|tbz)$/, "", set)
+}
+
+$2 ~ /^kern/ || $2 !~ /([.](tar|tgz|tbz))/ || (set in excluded_sets) {
+    next
 }
 {
     $1 = $1
