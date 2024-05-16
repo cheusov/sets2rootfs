@@ -18,7 +18,7 @@ set -e
 : ${release:=$(uname -r)}
 : ${machine:=$(uname -m)}
 
-while getopts 'c:d:m:r:s:u:x:' opt; do
+while getopts 'c:d:m:r:s:u:x:X:' opt; do
     case "$opt" in
 	c)
 	    cache_dir="$OPTARG";;
@@ -34,6 +34,8 @@ while getopts 'c:d:m:r:s:u:x:' opt; do
 	    url_to_cksum="$OPTARG";;
 	x)
 	    excluded_sets="$excluded_sets $OPTARG";;
+	X)
+	    excluded_sets_prefixes="$excluded_sets_prefixes $OPTARG";;
 	\?)
 	    exit 1;;
     esac
@@ -80,17 +82,28 @@ cksum_fn="$cache_dir/cksums"
 
 $FTP_CALL "$cksum_fn" "$url_to_cksum"
 
+echo "excluded_sets_prefixes=$excluded_sets_prefixes" 1>&2
+
 normalize_cksum_file() {
-    awk -F'[ ()=]+' -v excluded_sets_str="$excluded_sets" '
+    awk -F'[ ()=]+' -v excluded_sets_str="$excluded_sets" -v excluded_sets_prefixes_str="$excluded_sets_prefixes" '
 BEGIN {
+    sub(/^ /, "", excluded_sets_str)
     split(excluded_sets_str, a)
     for (i in a)
 	excluded_sets[a[i]] = 1
+
+    sub(/^ /, "", excluded_sets_prefixes_str)
+    split(excluded_sets_prefixes_str, excluded_sets_prefixes, / /)
 }
 
 {
     set = $2
     sub(/[.](tar.*|tgz|tbz)$/, "", set)
+    for (i in excluded_sets_prefixes) {
+	prefix = excluded_sets_prefixes[i]
+	if (substr(set, 1, length(prefix)) == prefix)
+	    next
+    }
 }
 
 $2 ~ /^kern/ || $2 !~ /([.](tar|tgz|tbz))/ || (set in excluded_sets) {
