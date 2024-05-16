@@ -106,9 +106,10 @@ BEGIN {
     }
 }
 
-$2 ~ /^kern/ || $2 !~ /([.](tar|tgz|tbz))/ || (set in excluded_sets) {
+$2 !~ /([.](tar|tgz|tbz))/ || (set in excluded_sets) {
     next
 }
+
 {
     $1 = $1
     print $0
