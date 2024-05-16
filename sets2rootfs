@@ -18,12 +18,14 @@ set -e
 : ${release:=$(uname -r)}
 : ${machine:=$(uname -m)}
 
-while getopts 'c:d:r:s:u:x:' opt; do
+while getopts 'c:d:m:r:s:u:x:' opt; do
     case "$opt" in
 	c)
 	    cache_dir="$OPTARG";;
 	d)
 	    root_dir="$OPTARG";;
+	m)
+	    machine="$OPTARG";;
 	r)
 	    release="$OPTARG";;
 	s)
