@@ -87,9 +87,12 @@ url_dir="${url_to_cksum%/*}"
 
 cd "$cache_dir"
 
-cksum_fn="$cache_dir/cksums"
-
-$FTP_CALL "$cksum_fn" "$url_to_cksum"
+if echo "$url_to_cksum" | grep -q ://; then
+    cksum_fn="$cache_dir/cksums"
+    $FTP_CALL "$cksum_fn" "$url_to_cksum"
+else
+    cksum_fn="$url_to_cksum"
+fi
 
 normalize_cksum_file() {
     awk -F'[ ()=]+' \
