@@ -18,12 +18,14 @@ set -e
 : ${release:=$(uname -r)}
 : ${machine:=$(uname -m)}
 
-while getopts 'c:d:i:I:m:r:s:u:x:X:' opt; do
+while getopts 'c:d:Di:I:m:r:s:u:x:X:' opt; do
     case "$opt" in
 	c)
 	    cache_dir="$OPTARG";;
 	d)
 	    root_dir="$OPTARG";;
+	D)
+	    download_only=1;;
 	i)
 	    included_sets="$included_sets|^$OPTARG"'$';;
 	I)
@@ -46,18 +48,19 @@ while getopts 'c:d:i:I:m:r:s:u:x:X:' opt; do
 done
 shift `expr $OPTIND - 1`
 
-if test -z "$root_dir"; then
-    echo "Option -r is mandatory" 1>&2
-    exit 2
+if test -z "$download_only"; then
+    if test -z "$root_dir"; then
+	echo "Option -r is mandatory" 1>&2
+	exit 2
+    fi
+    if ! test -d "$root_dir"; then
+	echo "Root FS directory $root_dir does not exist" 1>&2
+	exit 2
+    fi
 fi
 
 if test -z "$cache_dir"; then
     echo "Option -c is mandatory" 1>&2
-    exit 2
-fi
-
-if ! test -d "$root_dir"; then
-    echo "Root FS directory $root_dir does not exist" 1>&2
     exit 2
 fi
 
@@ -135,9 +138,11 @@ cksum_check(){
 
 unpack_set() {
     # $1 -- set file name
-    echo "unpacking $set" 1>&2
-    $TAR_CMD $TAR_OPTS -C "$root_dir" -xpf "$set"
-    touch "$cache_dir/$set.unpacked.done"
+    if test -z "$download_only"; then
+	echo "unpacking $set" 1>&2
+	$TAR_CMD $TAR_OPTS -C "$root_dir" -xpf "$set"
+	touch "$cache_dir/$set.unpacked.done"
+    fi
 }
 
 process_sets(){
