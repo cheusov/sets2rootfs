@@ -18,10 +18,12 @@ set -e
 : ${release:=$(uname -r)}
 : ${machine:=$(uname -m)}
 
-while getopts 'c:d:Di:I:m:r:s:u:x:X:' opt; do
+while getopts 'c:Cd:Di:I:m:r:s:u:x:X:' opt; do
     case "$opt" in
 	c)
 	    cache_dir="$OPTARG";;
+	C)
+	    remove_cache_dir=1;;
 	d)
 	    root_dir="$OPTARG";;
 	D)
@@ -159,4 +161,11 @@ process_sets(){
     done
 }
 
+remove_cache_dir() {
+    if test -n "$remove_cache_dir"; then
+	rm -rf "$cache_dir"
+    fi
+}
+
 normalize_cksum_file "$cksum_fn" | process_sets
+remove_cache_dir

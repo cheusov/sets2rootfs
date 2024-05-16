@@ -10,6 +10,7 @@
 .Nd create rootfs for NetBSD and OpenBSD from sets files
 .Sh SYNOPSIS
 .Nm
+.Op Fl C
 .Op Fl c Ar cache_dir
 .Op Fl D | d Ar root_dir
 .Op Fl u Ar url
@@ -18,6 +19,7 @@
 .Op Fl x Ar set
 .Op Fl X Ar set_prefix
 .Nm
+.Op Fl C
 .Op Fl c Ar cache_dir
 .Op Fl D | d Ar root_dir
 .Op Fl s Ar os
@@ -38,6 +40,8 @@ The following options are available:
 This option specifies the directory for cache, where
 all sets are downloaded before unpacking.
 This is a mandatory option.
+.It Fl \&C
+Remove cache directory after successful unpacking sets.
 .It Fl \&d
 Directory for rootfs. 
 This is a mandatory option.
