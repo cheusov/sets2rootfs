@@ -11,11 +11,22 @@
 .Sh SYNOPSIS
 .Nm
 .Op Fl c Ar cache_dir
-.Op Fl d Ar root_dir
-.Op Fl r Ar os_release
-.Op Fl s Ar os
+.Op Fl D | d Ar root_dir
 .Op Fl u Ar url
-.Op Ar
+.Op Fl i Ar set
+.Op Fl I Ar set_prefix
+.Op Fl x Ar set
+.Op Fl X Ar set_prefix
+.Nm
+.Op Fl c Ar cache_dir
+.Op Fl D | d Ar root_dir
+.Op Fl s Ar os
+.Op Fl r Ar os_release
+.Op Fl m Ar os_arch
+.Op Fl i Ar set
+.Op Fl I Ar set_prefix
+.Op Fl x Ar set
+.Op Fl X Ar set_prefix
 .Sh DESCRIPTION
 .Nm
 downloads cksum file for NetBSD/OpenBSD sets, checks the checksums and unpacks
@@ -30,6 +41,17 @@ This is a mandatory option.
 .It Fl \&d
 Directory for rootfs. 
 This is a mandatory option.
+.It Fl \&D
+Download sets and check cksums, but do not unpack them.
+.It Fl \&i
+Download and unpack only the specified set.
+This option can be applied multiple times.
+.It Fl \&I
+Download and unpack only sets having the specified prefix.
+This option can be applied multiple times.
+.It Fl \&m
+Machine architecture.
+The default is architecture of running operating system.
 .It Fl \&r
 Operating system release.
 The default is a version of running operating system.
@@ -43,13 +65,22 @@ https://cdn.netbsd.org/pub/NetBSD/NetBSD-$release/$machine/binary/sets/SHA512
 for NetBSD and
 https://cdn.openbsd.org/pub/OpenBSD/$release/$machine/SHA256
 for OpenBSD.
+.It Fl \&x
+Do not download and unpack the specified set.
+This option can be applied multiple times.
+.It Fl \&X
+Do not download and unpack sets having the specified prefix.
+This option can be applied multiple times.
 .\".It Ev ENVVARNAME
 .\"description for environment variable
 .Sh EXAMPLES
 .Bd -literal -compact
  # sets2rootfs -c /tmp/OpenBSD-7.5.cache -s OpenBSD -r 7.5 -d /var/chroots/OpenBSD-7.5
  # sets2rootfs -c /tmp/NetBSD-10.cache -d /var/chroots/NetBSD-10
- # sets2rootfs -c /tmp/NetBSD.cache -d /var/chroots/NetBSD
+ # sets2rootfs -c /tmp/NetBSD.cache -d /var/chroots/NetBSD \\
+    -Xx -Xkern -xgames -xgpufw -xrescue -xmodules
+ # sets2rootfs -c /tmp/NetBSD.cache -d /var/chroots/NetBSD -r 9.4 \\
+    -i base -i etc
  # sets2rootfs -c /tmp/NetBSD.cache -d /var/chroots/NetBSD-20240513 \\
     -u http://nyftp.netbsd.org/pub/NetBSD-daily/HEAD/latest/riscv-riscv64/binary/sets/MD5
 .Ed
