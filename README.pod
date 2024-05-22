@@ -3,8 +3,8 @@
 =head1 Overview:
 
 B<sets2rootfs> downloads cksum file for NetBSD/OpenBSD sets, checks
-the checksums and unpacks downloaded sets, thus creating rootfs for
-the system.
+the checksums and unpacks downloaded sets, thus creating a template
+for rootfs of the system.
 
 =head1 Examples
 
