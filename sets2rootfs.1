@@ -81,6 +81,36 @@ Do not download and unpack sets having the specified prefix.
 This option can be applied multiple times.
 .\".It Ev ENVVARNAME
 .\"description for environment variable
+.Sh ENVIRONMENT
+The following environment variables affect the execution of
+.Nm :
+.Bl -tag -width CKSUM_CALL
+.It Ev FTP_CMD
+If set, the specified command is used for downloading.
+The default is
+.Ic ftp .
+.It Ev FTP_CALL
+This variable overrides the default
+.Ic "$FTP_CMD -v -o" .
+.It Ev CKSUM_CMD
+If set, the specified command is used for calculating cksum.
+The default is
+.Ic cksum .
+.It Ev CKSUM_CALL
+This variable overrides the default
+.Ic "$CKSUM_CMD -a" .
+.It Ev TAR_CMD
+If set, the specified command is used for unpacking.
+The default is
+.Ic tar .
+.It Ev TAR_OPTS
+Options passed to
+.Ic "$TAR_CMD"
+in addition to
+.Fl xpf .
+The default is
+.Fl z .
+.El
 .Sh EXAMPLES
 .Bd -literal -compact
  # sets2rootfs -c /tmp/OpenBSD-7.5.cache -s OpenBSD -r 7.5 -d /var/chroots/OpenBSD-7.5
