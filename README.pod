@@ -13,6 +13,9 @@ for rootfs of the system.
     # sets2rootfs -c /tmp/NetBSD.cache -d /var/chroots/NetBSD
     # sets2rootfs -c /tmp/NetBSD.cache -d /var/chroots/NetBSD-20240513 \\
       -u http://nyftp.netbsd.org/pub/NetBSD-daily/HEAD/latest/riscv-riscv64/binary/sets/MD5
+    # env FTP_CALL='wget -O' CKSUM_CALL='digest' sets2rootfs \\
+      -c /tmp/OpenBSD-7.5.cache -s OpenBSD -mamd64 -r 7.5 \\
+      -d /tmp/rootfs-OpenBSD-7.5
 
 =head1 Copyright
 
